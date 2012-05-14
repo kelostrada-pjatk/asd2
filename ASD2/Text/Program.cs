@@ -9,7 +9,16 @@ namespace ASD.Text
     {
         static void Main(string[] args)
         {
-
+            string A = "alaalala";
+            string B = "ala";
+            foreach (int i in StringMatching.ComputeP(B))
+            {
+                Console.WriteLine(i);
+            }
+            foreach (int i in StringMatching.RK(A, B))
+            {
+                Console.WriteLine(i);
+            }
         }
     }
 }

@@ -34,7 +34,7 @@
         /// </summary>
         /// <param name="x">Analizowany wzorzec</param>
         /// <returns>Obliczona tablica długości prefikso-sufiksów</returns>
-        private static int[] ComputeP(string x)
+        public static int[] ComputeP(string x)
         {
             int[] P = new int[x.Length + 1];
             int t;
