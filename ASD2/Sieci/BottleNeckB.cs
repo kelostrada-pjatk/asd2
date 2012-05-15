@@ -1,4 +1,4 @@
-﻿
+﻿/*
 using System.Collections.Generic;
 using System;
 namespace ASD.Graph
@@ -54,7 +54,7 @@ namespace ASD.Graph
             ext = new Edge[0];                 // ZMIENIĆ
             IGraph c2 = new AdjacencyMatrixGraph(true, c.VerticesCount * 2 + 5);
             
-
+            IGraph g2 = g.IsolatedVerticesGraph(true, g.VerticesCount*2 + 5);
             List<Edge> used = new List<Edge>();
             int x2 = g.VerticesCount - 1;
 
@@ -82,42 +82,46 @@ namespace ASD.Graph
                 {
                     flow.AddEdge(i, ujscie, p[i]);
                     c2.AddEdge(i, ujscie, 0);
-                    flowValue += Math.Abs(p[i]);
                 }
                 if (p[i] > 0)
                 {
                     flow.AddEdge(zrodlo, i, p[i]);
                     c2.AddEdge(zrodlo, i,  0);
-                    cost += p[i];
                 }
             }
 
-            cost = flowValue - cost;
 
-            /*
-            used.Clear();
-            x2 = c.VerticesCount - 1;
+            
+            //used.Clear();
+            //x2 = c.VerticesCount - 1;
             
            
-            for (int i = 0; i < c.VerticesCount; i++)
-            {
-                foreach (Edge e in c.OutEdges(i))
-                {
-                    if (used.Contains(e)) continue;
-                    c2.AddEdge(e.From, e.To, 0);
-                    c2.AddEdge(++x2, e.To, (int)c.GetEdgeWeight(e.From, e.To));
-                    c2.AddEdge(e.From, x2, 0);
-                    used.Add(e); 
-                }
-            }
-            */
+            //for (int i = 0; i < c.VerticesCount; i++)
+            //{
+            //    foreach (Edge e in c.OutEdges(i))
+            //    {
+            //        if (used.Contains(e)) continue;
+            //        c2.AddEdge(e.From, e.To, 0);
+            //        c2.AddEdge(++x2, e.To, (int)c.GetEdgeWeight(e.From, e.To));
+            //        c2.AddEdge(e.From, x2, 0);
+            //        used.Add(e); 
+            //    }
+            //}
+            
             
 
             IGraph flow2 = g.IsolatedVerticesGraph(true, g.VerticesCount * 2 + 5);
 
             flow.MinCostFlow(c2, zrodlo, ujscie, out flow2);
 
-            flow = flow2.Clone();
+            for (int i = 0; i < g.VerticesCount; i++)
+            {
+                foreach (Edge e in flow.OutEdges(i))
+                {
+                    if (e.To < g.VerticesCount)
+                        flow.AddEdge
+                }
+            }
 
             /// Jeśli funkcja zwraca 0, to<br/>
             ///    parametr flowValue jest równy modułowi sumy zapotrzebowań<br/>
@@ -133,10 +137,12 @@ namespace ASD.Graph
             ///    parametr cost jest równy sumarycznemu kosztowi rozbudowy sieci (zwiększenia przepustowości krawędzi)<br/>
             ///    parametr ext jest tablicą zawierającą informację o tym o ile należy zwiększyć przepustowości krawędzi<br/>
 
-            int pom=0;
             foreach (int i in p)
-                if (i > 0)
-                    pom += i;
+                if (i < 0)
+                    flowValue += Math.Abs(i);
+                else if (i > 0)
+                    cost += i;
+            cost = flowValue - cost;
 
             if (cost == 0 && ext.Length == 0)
                 return 0;
@@ -148,4 +154,4 @@ namespace ASD.Graph
 
     }
 
-}
+}*/

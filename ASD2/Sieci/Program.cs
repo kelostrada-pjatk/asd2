@@ -89,6 +89,7 @@ public class Lab11
 
         p1[0] = 50;
         g1.DelEdge(3, 6);
+        c1.DelEdge(3, 6);
 
         res = g1.BottleNeck(c1, p1, out fv, out cost, out f, out ext);
 
