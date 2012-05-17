@@ -1,10 +1,8 @@
-﻿
-using System.Collections.Generic;
-using System;
+﻿using System.Collections.Generic;
 namespace ASD.Graph
 {
 
-    public static class BottleNeckExtender
+    public static class BottleNeckExtenderr
     {
 
         /// <summary>
@@ -44,82 +42,105 @@ namespace ASD.Graph
         ///    parametr cost jest równy sumarycznemu kosztowi rozbudowy sieci (zwiększenia przepustowości krawędzi)<br/>
         ///    parametr ext jest tablicą zawierającą informację o tym o ile należy zwiększyć przepustowości krawędzi<br/>
         /// Uwaga: parametr ext zawiera informacje jedynie o krawędziach, których przepustowości trzeba zwiększyć
-        ///     (każdy element tablicy to opis jednej takiej krawędzi)
+        //     (każdy element tablicy to opis jednej takiej krawędzi)
         /// </remarks>
-        public static int BottleNeck(this IGraph g, IGraph c, int[] p, out int flowValue, out int cost, out IGraph flow, out Edge[] ext)
+        public static int BottleNeckM(this IGraph g, IGraph c, int[] p, out int flowValue, out int cost, out IGraph flow, out Edge[] ext)
         {
-            flowValue = 0;                    // ZMIENIĆ 
-            cost = 0;                          // ZMIENIĆ
-            flow = new AdjacencyMatrixGraph(true, g.VerticesCount); 
-            ext = new Edge[0];                  // ZMIENIĆ
+            flowValue = 0;                     
+            cost = 0;                         
+            flow = g.IsolatedVerticesGraph(); 
+            ext = new Edge[0];                
+            //return 2;     
+            IGraph mincostFlow;
+
+            int balans = 0;
+            int minv = 0;
+            int maxv = 0;      
 
 
-            IGraph g1 = new AdjacencyMatrixGraph(true, g.VerticesCount * 2 + 2);
-            IGraph c1 = new AdjacencyMatrixGraph(true, g.VerticesCount * 2 + 2);
-            IGraph flow2; 
-            List<Edge> ext1 = new List<Edge>();
-            int wplywy = 0, minw = 0, maxw= 0;
-              
-            
-            for (int i = 0; i < g.VerticesCount; i++)
+            int n = g.VerticesCount;
+            IGraph gnew = new AdjacencyMatrixGraph(true, 2 * n + 2);
+            IGraph cnew = new AdjacencyMatrixGraph(true, 2 * n + 2);
+            // <0;n-1> wierzcholki
+            // n, n+1 to zrodlo i ujscie
+            // <n+2;2n+1> to zdublowane wierzcholki
+            //Krawedzie
+            for (int i = 0; i < n; i++)
             {
-                foreach (var e in g.OutEdges(i))
+                foreach (Edge e in g.OutEdges(i))
                 {
-                    g1.AddEdge(i, e.To, e.Weight);
-                    g1.AddEdge(i + g.VerticesCount + 2, e.To, int.MaxValue);
-                    g1.AddEdge(i, i + g.VerticesCount + 2, int.MaxValue);
-                } 
-                foreach (var e in c.OutEdges(i))
+                    gnew.AddEdge(e.From, e.To, e.Weight);
+                    gnew.AddEdge(n + 2 + e.From, e.To, int.MaxValue);
+                    gnew.AddEdge(e.From, n + 2 + e.From, int.MaxValue);
+                }
+
+                foreach (Edge e in c.OutEdges(i))
                 {
-                    c1.AddEdge(i, e.To, 0);  
-                    c1.AddEdge(i + g.VerticesCount + 2, e.To, e.Weight);
-                    c1.AddEdge(i, i + g.VerticesCount + 2, 0);
+                    cnew.AddEdge(e.From, e.To, 0);
+                    cnew.AddEdge(e.From + n + 2, e.To, e.Weight);
+                    cnew.AddEdge(e.From, e.From + n + 2, 0);
                 }
             }
-
-
-            for (int i = 0; i < g.VerticesCount; i++)
+            //Jedno zrodlo i ujscie
+            for (int i = 0; i < n; i++)
+            {
                 if (p[i] > 0)
                 {
-                    g1.AddEdge(g.VerticesCount, i, Math.Abs(p[i]));
-                    c1.AddEdge(g.VerticesCount, i,  0);
+                    gnew.AddEdge(n, i, p[i]);
+                    cnew.AddEdge(n, i, 0);
                 }
                 else if (p[i] < 0)
                 {
-                    g1.AddEdge(i, g.VerticesCount+ 1, Math.Abs(p[i]));
-                    c1.AddEdge(i, g.VerticesCount + 1, 0);
+                    gnew.AddEdge(i, n + 1, -p[i]);
+                    cnew.AddEdge(i, n + 1, 0);
                 }
-                 
-            cost  = g1.MinCostFlow(c1, g.VerticesCount, g.VerticesCount + 1, out flow2);
-              
-            for (int i = 0; i < g.VerticesCount;  i++)
-                foreach (var e in flow2.OutEdges(i))
-                    if (i != g.VerticesCount && e.To != g.VerticesCount + 1 && e.To != i + g.VerticesCount + 2)
-                        flow.AddEdge(i, e.To, e.Weight +(int)flow2.GetEdgeWeight(i + g.VerticesCount + 2, e.To));
-               
-            for (int i = g.VerticesCount + 2; i<= 2 * g.VerticesCount +1; i++)
-                foreach (var e in flow2.OutEdges(i))
-                    if (e.Weight != 0 && e.To != i+ g.VerticesCount + 2 && i != g.VerticesCount && e.To != g.VerticesCount + 1)
-                    {
-                        ext1.Add(new Edge(i - g.VerticesCount - 2, e.To, e.Weight));
-                        flow.ModifyEdgeWeight(i -g.VerticesCount - 2, e.To, e.Weight);
-                    }
-             
-            ext = ext1.ToArray();
+            }
 
-            foreach (var e in flow2.OutEdges(g.VerticesCount))
-                flowValue+=e.Weight;
+            cost = gnew.MinCostFlow(cnew, n, n + 1, out mincostFlow);
+
+            flow = new AdjacencyMatrixGraph(true, n);
+
+            for (int i = 0; i < n; i++)
+                foreach (Edge e in mincostFlow.OutEdges(i))
+                {
+                    if (e.From == n || e.To == n + 1 || e.To == e.From + n + 2 ) continue;
+                    flow.AddEdge(e.From, e.To, e.Weight + (int)mincostFlow.GetEdgeWeight(e.From + n + 2, e.To));
+                }
+
+            List<Edge> doPoprawy = new List<Edge>();
+
+            for (int i = n + 2; i <= 2 * n + 1; i++)
+                foreach (Edge e in mincostFlow.OutEdges(i))
+                {
+                    if (e.Weight == 0 || e.To == e.From + n + 2 || e.From == n || e.To == n + 1) continue;
+                    doPoprawy.Add(new Edge(e.From - n - 2, e.To, e.Weight));
+                    flow.ModifyEdgeWeight(e.From - n - 2, e.To, e.Weight);
+                }
+
+            ext = doPoprawy.ToArray();
+
+            foreach (Edge e in mincostFlow.OutEdges(n))
+                flowValue += e.Weight;
 
             for (int i = 0; i < p.Length; i++)
             {
-                wplywy += p[i];
+                balans += p[i];
                 if (p[i] > 0)
-                    maxw += Math.Abs(p[i]); 
+                    maxv += p[i];
                 if (p[i] < 0)
-                    minw -= Math.Abs(p[i]);
+                    minv += p[i];
             }
 
-            return (wplywy < 0) ? 2 : ((flowValue == maxw) ? ((cost == 0) ? 0 : 1) : 2);
+            if (balans < 0)       //wiecej wypl niz wplyw
+                return 2;
+
+            if (cost == 0 && flowValue == maxv) //nie poprawilismy, jest maxflow
+                return 0;
+
+            if (flowValue == maxv && cost != 0) //poprawilismy, udalo sie
+                return 1;
+
+            return 2;
 
         }
 
