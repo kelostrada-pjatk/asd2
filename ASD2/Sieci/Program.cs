@@ -38,12 +38,16 @@ public class Lab11
         int[] p1 = new int[8] { 50, 50, 0, 0, -10, -20, -30, -40 };
 
         int fv, cost, res;
-        IGraph f;
+        IGraph f,f2;
         Edge[] ext;
 
         Console.WriteLine();
 
         res = g1.BottleNeck(c1, p1, out fv, out cost, out f, out ext);
+        g1.BottleNeckM(c1, p1, out fv, out cost, out f2, out ext);
+
+        if (f.Compare(f2))
+            Console.WriteLine("Jest ok ;)");
 
         Console.Write("Test 1 - nie ma potrzeby rozbudowy sieci: ");
         if (res == 0 && fv == 100 && cost == 0 && ext.Length == 0)
@@ -58,6 +62,10 @@ public class Lab11
         g1.AddEdge(2, 4, 10);
 
         res = g1.BottleNeck(c1, p1, out fv, out cost, out f, out ext);
+        g1.BottleNeckM(c1, p1, out fv, out cost, out f2, out ext);
+
+        if (f.Compare(f2))
+            Console.WriteLine("Jest ok ;)");
 
         Console.Write("Test 2 - trzeba rozbudowac siec i mozna to zrobic: ");
         if (res == 1 && fv == 100 && cost == 20 && ext.Length > 0)
@@ -74,6 +82,9 @@ public class Lab11
         p1[0] = 40;
 
         res = g1.BottleNeck(c1, p1, out fv, out cost, out f, out ext);
+        g1.BottleNeckM(c1, p1, out fv, out cost, out f2, out ext);
+        if (f.Compare(f2))
+            Console.WriteLine("Jest ok ;)");
 
         Console.Write("Test 3 - nie da sie rozbudowac sieci: ");
         if (res == 2 && fv == 90 && cost == 10 && ext.Length > 0)
@@ -92,6 +103,10 @@ public class Lab11
         c1.DelEdge(3, 6);
 
         res = g1.BottleNeck(c1, p1, out fv, out cost, out f, out ext);
+        g1.BottleNeckM(c1, p1, out fv, out cost, out f2, out ext);
+        if (f.Compare(f2))
+            Console.WriteLine("Jest ok ;)");
+
 
         Console.Write("Test 4 - nie da sie rozbudowac sieci: ");
         if (res == 2 && fv == 70 && cost == 20 && ext.Length > 0)
